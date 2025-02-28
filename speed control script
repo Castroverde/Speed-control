@@ -15,14 +15,29 @@ end
 
 -- Box for speed input
 One:Box("Speed", "Enter speed value", function(value)
-    -- Update speed value
-    speedValue = tonumber(value) or 16 -- Default speed is 16 if input is invalid
-    print("Speed set to " .. speedValue)
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Speed Control";
-        Text = "Speed set to " .. speedValue;
-        Duration = 5;
-    })
+    local humanoid = getHumanoid()
+    if humanoid then
+        originalSpeed = humanoid.WalkSpeed -- Store the original speed
+        local numberValue = tonumber(value)
+        if numberValue then
+            -- Update speed value
+            speedValue = numberValue
+            print("Speed set to " .. speedValue)
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Speed Control";
+                Text = "Speed set to " .. speedValue;
+                Duration = 5;
+            })
+        else
+            -- Notify the user about the original speed
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Speed Control";
+                Text = "Invalid input. Speed remains unchanged at the original speed of " .. originalSpeed .. ".";
+                Duration = 5;
+            })
+            print("Invalid speed input")
+        end
+    end
 end)
 
 -- Toggle for enabling/disabling speed control
@@ -30,7 +45,6 @@ One:Toggle("Enable Speed Control", function(state)
     local humanoid = getHumanoid()
     if humanoid then
         if state then
-            originalSpeed = humanoid.WalkSpeed -- Store the original speed
             humanoid.WalkSpeed = speedValue
             print("Speed control enabled")
             game.StarterGui:SetCore("SendNotification", {
