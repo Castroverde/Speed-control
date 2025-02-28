@@ -17,7 +17,6 @@ end
 One:Box("Speed", "Enter speed value", function(value)
     local humanoid = getHumanoid()
     if humanoid then
-        originalSpeed = humanoid.WalkSpeed -- Store the original speed
         local numberValue = tonumber(value)
         if numberValue then
             -- Update speed value
@@ -32,7 +31,7 @@ One:Box("Speed", "Enter speed value", function(value)
             -- Notify the user about the original speed
             game.StarterGui:SetCore("SendNotification", {
                 Title = "Speed Control";
-                Text = "Invalid input. Speed remains unchanged at the original speed of " .. originalSpeed .. ".";
+                Text = "Invalid input. Speed remains unchanged at the original speed of " .. (originalSpeed or humanoid.WalkSpeed) .. ".";
                 Duration = 5;
             })
             print("Invalid speed input")
@@ -45,6 +44,7 @@ One:Toggle("Enable Speed Control", function(state)
     local humanoid = getHumanoid()
     if humanoid then
         if state then
+            originalSpeed = humanoid.WalkSpeed -- Store the original speed
             humanoid.WalkSpeed = speedValue
             print("Speed control enabled")
             game.StarterGui:SetCore("SendNotification", {
@@ -57,7 +57,7 @@ One:Toggle("Enable Speed Control", function(state)
             print("Speed control disabled")
             game.StarterGui:SetCore("SendNotification", {
                 Title = "Speed Control";
-                Text = "Speed control disabled";
+                Text = "Speed control disabled and restored to original speed of " .. (originalSpeed or 16) .. ".";
                 Duration = 5;
             })
         end
