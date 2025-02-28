@@ -3,6 +3,7 @@ local One = library:Window("Speed Control")
 
 local speedValue = 16 -- Default speed value
 local originalSpeed -- Variable to store the original game speed
+local enableSpeedControl = false -- Variable to track if speed control is enabled
 
 -- Function to get the player's humanoid
 local function getHumanoid()
@@ -45,14 +46,25 @@ One:Toggle("Enable Speed Control", function(state)
     if humanoid then
         if state then
             originalSpeed = humanoid.WalkSpeed -- Store the original speed
-            humanoid.WalkSpeed = speedValue
+            enableSpeedControl = true
             print("Speed control enabled")
             game.StarterGui:SetCore("SendNotification", {
                 Title = "Speed Control";
                 Text = "Speed control enabled";
                 Duration = 5;
             })
+            
+            -- Loop to maintain the speed
+            spawn(function()
+                while enableSpeedControl do
+                    wait(0.1)
+                    if humanoid.WalkSpeed ~= speedValue then
+                        humanoid.WalkSpeed = speedValue
+                    end
+                end
+            end)
         else
+            enableSpeedControl = false
             humanoid.WalkSpeed = originalSpeed or 16 -- Reset to original speed or default to 16 if unknown
             print("Speed control disabled")
             game.StarterGui:SetCore("SendNotification", {
