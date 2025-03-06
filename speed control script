@@ -15,7 +15,7 @@ local function getHumanoid()
     return nil
 end
 
--- Function to gradually set the speed to avoid detection
+-- Function to gradually set the speed
 local function gradualSetSpeed(targetSpeed)
     local humanoid = getHumanoid()
     if humanoid then
@@ -23,22 +23,8 @@ local function gradualSetSpeed(targetSpeed)
         local step = (targetSpeed - currentSpeed) / 50 -- Increase the number of steps for more gradual change
         for i = 1, 50 do
             humanoid.WalkSpeed = humanoid.WalkSpeed + step
-            wait(math.random(0.1, 0.2)) -- Randomize wait time to make it less detectable
+            wait(0.1) -- Gradual change with a consistent wait time
         end
-    end
-end
-
--- Function to periodically reset and reapply speed to bypass speed detection
-local function bypassSpeedDetection()
-    while enableSpeedControl do
-        local humanoid = getHumanoid()
-        if humanoid then
-            local resetSpeed = originalSpeed or 16 -- Reset to original speed or default to 16 if unknown
-            gradualSetSpeed(resetSpeed)
-            wait(math.random(1, 2)) -- Wait a random time to avoid detection
-            gradualSetSpeed(speedValue)
-        end
-        wait(math.random(2, 4)) -- Adjust the wait time as needed to bypass detection mechanisms
     end
 end
 
@@ -64,9 +50,6 @@ One:Toggle("Enable Speed Control", function(state)
             end
             enableSpeedControl = true
             gradualSetSpeed(speedValue)
-
-            -- Start bypassing speed detection immediately
-            spawn(bypassSpeedDetection)
 
             -- Listen for changes in the humanoid state
             humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
