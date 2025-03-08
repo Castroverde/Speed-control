@@ -2,8 +2,8 @@
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/bloodball/-back-ups-for-libs/main/random%202"))()
 local One = library:Window("Speed Control")
 
-local speedValue = 16 -- Default speed value
 local originalSpeed -- Variable to store the original game speed
+local speedValue -- Variable to store the speed value
 local enableSpeedControl = false -- Variable to track if speed control is enabled
 
 -- Function to get the player's humanoid
@@ -15,16 +15,11 @@ local function getHumanoid()
     return nil
 end
 
--- Function to gradually set the speed
-local function gradualSetSpeed(targetSpeed)
+-- Function to set the speed
+local function setSpeed(targetSpeed)
     local humanoid = getHumanoid()
     if humanoid then
-        local currentSpeed = humanoid.WalkSpeed
-        local step = (targetSpeed - currentSpeed) / 50 -- Increase the number of steps for more gradual change
-        for i = 1, 50 do
-            humanoid.WalkSpeed = humanoid.WalkSpeed + step
-            wait(0.1) -- Gradual change with a consistent wait time
-        end
+        humanoid.WalkSpeed = targetSpeed
     end
 end
 
@@ -35,13 +30,20 @@ One:Box("Speed", "Enter speed value", function(value)
         local numberValue = tonumber(value)
         if numberValue then
             speedValue = numberValue
-            gradualSetSpeed(speedValue)
+            if enableSpeedControl then
+                setSpeed(speedValue)
+                game.StarterGui:SetCore("SendNotification", {
+                    Title = "Speed Control",
+                    Text = "Speed set to " .. speedValue,
+                    Duration = 5
+                })
+            end
         end
     end
 end)
 
 -- Toggle for enabling/disabling speed control
-One:Toggle("Enable Speed Control", function(state)
+local toggleButton = One:Toggle("Enable Speed Control", function(state)
     local humanoid = getHumanoid()
     if humanoid then
         if state then
@@ -49,21 +51,33 @@ One:Toggle("Enable Speed Control", function(state)
                 originalSpeed = humanoid.WalkSpeed -- Store the original speed only once
             end
             enableSpeedControl = true
-            gradualSetSpeed(speedValue)
+            setSpeed(speedValue or originalSpeed)
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Speed Control",
+                Text = "Speed control enabled (Speed: " .. (speedValue or originalSpeed) .. ")",
+                Duration = 5
+            })
 
             -- Listen for changes in the humanoid state
             humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
                 if enableSpeedControl then
-                    gradualSetSpeed(speedValue)
+                    setSpeed(speedValue or originalSpeed)
                 end
             end)
         else
             enableSpeedControl = false
-            gradualSetSpeed(originalSpeed or 16) -- Reset to original speed or default to 16 if unknown
-            originalSpeed = nil -- Reset originalSpeed to allow re-initialization
+            setSpeed(originalSpeed or 16) -- Reset to original speed or default to 16 if unknown
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Speed Control",
+                Text = "Speed control disabled (Speed: " .. (originalSpeed or 16) .. ")",
+                Duration = 5
+            })
         end
     end
 end)
+
+-- Fix toggle button state immediately
+toggleButton:SetState(enableSpeedControl)
 
 -- Additional event listeners to prevent speed reset on ability use or being downed
 local player = game.Players.LocalPlayer
@@ -71,7 +85,14 @@ player.CharacterAdded:Connect(function(character)
     local humanoid = character:WaitForChild("Humanoid")
     humanoid.Died:Connect(function()
         if enableSpeedControl then
-            gradualSetSpeed(speedValue)
+            setSpeed(speedValue or originalSpeed)
         end
     end)
 end)
+
+-- Notification that the script was crafted by dagapanis0
+game.StarterGui:SetCore("SendNotification", {
+    Title = "Owner",
+    Text = "Crafted by dagapanis0",
+    Duration = 10
+})
